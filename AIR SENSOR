@@ -1,0 +1,30 @@
+//may be wrong...
+//wire library
+#include <Wire.h>
+
+//air quality sensor library
+#include <DFRobot_SGP40.h>
+
+//the new pins
+int const I2C_SDA = 33;
+int const I2C_SCL = 32;
+
+TwoWire I2CBME = TwoWire(0);
+
+DFRobot_SGP40 air_sensor;
+
+void setup(){
+   Serial.begin(115200);
+   I2CBME.begin(I2C_SCL, I2C_SDA);//last param is clock freq
+   air_sensor.begin(10000);
+}
+
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  uint16_t index = air_sensor.getVoclndex();
+
+  Serial.print("vocIndex = ");
+  Serial.println(index);
+  delay(1000);
+}
