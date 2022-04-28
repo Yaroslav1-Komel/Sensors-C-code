@@ -1,0 +1,55 @@
+#include <Wire.h>
+#define dust_sensor 12
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(115200);
+  Serial2.begin(9600,SERIAL_8N1,dust_sensor,-1);
+}
+void loop() {
+  // put your main code here, to run repeatedly:
+  byte dust_byte[30];
+  int dust_index = 0;
+  int dust_data[3];
+  int l = 0;
+  while(!Serial2.available()) { 
+  }
+  if(Serial2.read() == 0x42 && Serial2.read() == 0x4D) {
+    //Serial.println("header done");
+    for(int i = 0; i < 14; i++) {
+       if(Serial2.available()) {
+        
+         //if(i%2 == 0) {
+           //Serial.print("HIGH ");
+         //} else {
+           //Serial.print("LOW ");
+         //}
+         dust_byte[dust_index] =  Serial2.read();
+         //Serial.println(dust_byte[dust_index]);
+         dust_index++;
+       }
+    }
+    for(int i = 14; i < 30; i++) { //flush the no-data bytes[
+      if(Serial2.available()) {
+        Serial2.read();
+      }
+    }
+  }
+ //int h_length = dust_byte[0];
+ //int l_length = dust_byte[1];
+ //l = h_length + l_length + 2;
+ //Serial.print("length: ");
+ //Serial.println(l);
+  for(int i = 0; i < 3; i++) {
+    int value = (dust_byte[2+i*2]<<4) + dust_byte[2+1+(i*2)];
+    dust_data[i] = value;
+  }
+  Serial.print("PM1:");
+  Serial.print(dust_data[0]);
+  Serial.print(",\t");
+  Serial.print("PM2.5:");
+  Serial.print(dust_data[1]);
+  Serial.print(",\t");
+  Serial.print("PM10:");
+  Serial.print(dust_data[2]);
+  Serial.println("");
+}
