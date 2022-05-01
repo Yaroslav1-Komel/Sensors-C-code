@@ -1,0 +1,39 @@
+
+//#define LIGHT_SENSOR_PIN 36 // ESP32 pin GIOP36 (ADC0)
+
+int const LIGHT_SENSOR_PIN = 36 ;
+
+void setup() {
+  // initialize serial communication at 9600 bits per second:
+  Serial.begin(9600);
+
+  pinMode(4,OUTPUT);
+}
+
+void loop() {
+  // reads the input on analog pin (value between 0 and 4095)
+  int analogValue = analogRead(LIGHT_SENSOR_PIN);
+
+  Serial.print("Value Light= ");
+  Serial.print(analogValue);   // the raw analog reading
+
+  // We'll have a few threshholds, qualitatively determined
+  if (analogValue < 40) {
+    Serial.println(" => Night");
+    digitalWrite(4, LOW);
+  } else if (analogValue < 300) {
+    Serial.println(" => Dim");
+    digitalWrite(4, LOW);
+  } else if (analogValue < 1000) {
+    Serial.println(" => Light");
+    digitalWrite(4, LOW);
+  } else if (analogValue < 2000) {
+    Serial.println(" => Bright");
+    digitalWrite(4, HIGH);
+  } else {
+    Serial.println(" => Very bright");
+    digitalWrite(4, HIGH);
+  }
+
+  delay(1000);
+}
