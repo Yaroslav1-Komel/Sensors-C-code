@@ -1,4 +1,4 @@
- //wifi
+//wifi
 #include <WiFi.h>
 #include <WebServer.h>
 const char* ssid = "ITEK 2nd"; //Else IP address from raspberypi4
@@ -185,29 +185,22 @@ void displayInfo()
     Serial.print(F("INVALID"));
   }
   Serial.println();           //Gps loop finish
-  
+
+   //publishValue(gps.location.lat);                   //GPS publishValue(gps);     to mqtt.
+   
                    // Temperatura loop start 
 float sensor = analogRead(34);
-Serial.println(sensor);
+//Serial.println(sensor);
 float temp =  (sensor / 4095.0)* 1.05;         //4095.0
 // Convert the voltage into the temperature in Celsius
   float temperatureC = temp * 100;
 
-//if (temperatureC < cold && count == 0){
-////  
-//digitalWrite(13, LOW);
-//}
-//else if (temperatureC >= hot && count == 0){ 
-//  digitalWrite(13, HIGH);
-//} else {
-//  count--;
-//}
+
             publishValue(temperatureC);
 delay(1000);
                  // swith termometr 
                  // Print the temperature in Celsius
-   Serial.print(sensor);
-   Serial.print(temp);
+ 
  
   Serial.print("Temperature: ");
   Serial.print(temperatureC);
@@ -219,7 +212,7 @@ delay(1000);
   Serial.print(temperatureF);
   Serial.print("\xC2\xB0"); // shows degree symbol
   Serial.println("F");
-     publishValue(temperatureC);
+     publishValue(temperatureC);                           //publishValue(temperatureC); to mqtt
   delay(1000); // wait a second between readings
 //                 // temperatura loop finish
                  
@@ -228,6 +221,8 @@ delay(1000);
 
   Serial.print("vocIndex = ");
   Serial.println(index);
+  
+   publishValue(index);                               //publishValue(index);        to mqtt       
   delay(1000);  
             // AIR sensor loop finish. 
                       
@@ -277,6 +272,10 @@ byte dust_byte[30];
   Serial.print("PM10:");
   Serial.print(dust_data[2]);
   Serial.println("");
+ 
+   
+  
+    //publishValue(dust_data); 
               // Dust loop finish.
 
               //Light sensor loop start 
@@ -304,7 +303,7 @@ byte dust_byte[30];
     Serial.println(" => Day Very Bright");
     digitalWrite(4, HIGH);
   }
-
+                       publishValue(analogValue);    //LIGHT SENSOR publishValue(analogValue); 
   delay(1000);
 
              // Light sensor loop finish 
