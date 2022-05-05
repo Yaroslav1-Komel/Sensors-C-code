@@ -147,6 +147,10 @@ void displayInfo()
     Serial.print(gps.location.lat(), 6);
     Serial.print(F(","));
     Serial.print(gps.location.lng(), 6);
+    
+     
+   
+     
   }
   else
   {
@@ -186,7 +190,7 @@ void displayInfo()
   }
   Serial.println();           //Gps loop finish
 
-   //publishValue(gps.location.lat);                   //GPS publishValue(gps);     to mqtt.
+                                             //publishValue(gps);     //GPS publishValue(gps);     to mqtt.
    
                    // Temperatura loop start 
 float sensor = analogRead(34);
@@ -306,8 +310,6 @@ byte dust_byte[30];
                        publishValue(analogValue);    //LIGHT SENSOR publishValue(analogValue); 
   delay(1000);
 
-             // Light sensor loop finish 
-
- 
+             // Light sensor loop finish  
            
 }
