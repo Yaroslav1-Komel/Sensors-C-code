@@ -1,0 +1,61 @@
+import paho.mqtt.client as mqtt
+import mariadb, sys
+
+data_in = [None, None, None] # 0: temp , 1: voc, 2: light
+def add_measurement_to_database(cur, payload, topic):
+        all_data = True
+
+        if 'eaaa/e21a/test/Project3/temp' in topic:
+            data_in[0] = payload
+        elif 'eaaa/e21a/test/Project3/voc' in topic:
+            data_in[1] = payload
+        elif'eaaa/e21a/test/Project3/light' in topic:
+            data_in[2] = payload
+
+
+        for data in data_in:
+            if data is None:
+                all_data = False
+
+        if all_data is True:
+            cur.execute("INSERT INTO measurements.temperatures(temperature, vocIndex, light)"
+                        "VALUES (?,?,?)", (data_in[0], data_in[1],data_in[2]))
+            for index in range(0,3):
+                data_in[index] = None
+
+
+# The callback for when the client receives a connect response from the server
+def on_connect(client, userdata, flags, rc):
+    print("Connected with result code "+str(rc))
+    client.subscribe("eaaa/e21a/test/Project3/temp")
+    client.subscribe("eaaa/e21a/test/Project3/voc")
+    client.subscribe("eaaa/e21a/test/Project3/light")
+
+# The callback for when a PUBLISH message is received from the server
+def on_message(client, userdata, msg):
+    print(msg.topic+" "+str(msg.payload))
+    add_measurement_to_database(cur, float(msg.payload), msg.topic)
+
+# Connect to MariaDB Platform
+try:
+    conn = mariadb.connect(
+        user="root",
+        password="kalimag60148579",
+        host="127.0.0.1",
+        port=3306,
+        database="measurements",
+        autocommit=True
+    )
+except mariadb.Error as e:
+    print(f"Error connecting to MariaDB Platform: {e}")
+    sys.exit(1)
+
+# Get Cursor
+cur = conn.cursor()
+client = mqtt.Client()
+client.on_connect = on_connect
+client.on_message = on_message
+client.connect("test.mosquitto.org")
+#client.connect("10.120.0.220")
+client.loop_forever()
+
