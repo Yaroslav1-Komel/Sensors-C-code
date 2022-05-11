@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=devicewith, initial-scale=1.0"/>
+    <title>Table</title>
+</head>
+<body>
+    <table border=1>
+        <tr>
+            {% for header in headings %}
+            <th>{{ header }}</th>
+            {% endfor %}
+        </tr>
+        {% for row in data %}
+            <tr>
+                {% for cell in row %}
+                <td> {{ row[cell] }}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+
+    </table>
+
+</body>
+</html>
