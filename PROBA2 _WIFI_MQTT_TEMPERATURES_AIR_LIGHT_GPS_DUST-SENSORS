@@ -3,8 +3,8 @@
 #include <WebServer.h>
 const char* ssid = "ITEK 2nd"; //Else IP address from raspberypi4
 const char* password = "Four_Sprints_F21v";   // password for the network
- //const char* ssid = "NETGEAR98";                                                      
- //const char* password = "quickink024"; 
+//const char* ssid = "NETGEAR98";
+//const char* password = "quickink024";
 WiFiClient espClient;
 
 //mqtt connection
@@ -12,25 +12,30 @@ WiFiClient espClient;
 //const char* mqtt_server = "10.120.0.220"; // My raspberi pi  or another mqtt server
 const char* mqtt_server = "test.mosquitto.org";
 int        port     = 1883;
-const char* inTopic = "eaaa/e21a/test/Project3";
+const char* inTopictemp = "eaaa/e21a/test/Project3/temp";              //const char* inTopictemp = "eaaa/e21a/test/Project3/temp/voc/light"; ?
+const char* inTopicvoc = "eaaa/e21a/test/Project3/voc";
+const char* inTopiclight = "eaaa/e21a/test/Project3/light";
+
 PubSubClient client(espClient);
 
-             // GPS start const
+// GPS start const
 #include <TinyGPS++.h>
 #include <SoftwareSerial.h>
-static const int RXPin = 15, TXPin = 2; 
-static const uint32_t GPSBaud = 9600; 
+static const int RXPin = 15, TXPin = 2;
+static const uint32_t GPSBaud = 9600;
 TinyGPSPlus gps;
 SoftwareSerial ss(RXPin, TXPin);
-             // GPS finish const
-             
-             //temperatura start
+// GPS finish const
+
+//temperatura start
 const float hot = 25; //hot parameter
 const float cold = 15; //cold parameter
 
-              // temperatura finish
-              
-              // AIR sensor start
+
+
+// temperatura finish
+
+// AIR sensor start
 //may be wrong...
 //wire library
 #include <Wire.h>
@@ -45,120 +50,127 @@ int const I2C_SCL = 32;
 TwoWire I2CBME = TwoWire(0);
 
 DFRobot_SGP40 air_sensor;
-               // AIR sensor finish.
-               
-               //Dust sensor start
+// AIR sensor finish.
+
+//Dust sensor start
 #include <Wire.h>
 #define dust_sensor 12
-              //Dust sensor finish
-              
-              //Light sensor start 
-int const LIGHT_SENSOR_PIN = 36 ;
-                                             
-               // Light sensor finish
+//Dust sensor finish
 
-              
-             
+//Light sensor start
+int const LIGHT_SENSOR_PIN = 36 ;
+
+// Light sensor finish
+
+
+
 void setup()
-{              // GPS setup start
-  
+{ // GPS setup start
+
   ss.begin(GPSBaud);
   Serial.println(F("NEO-6M GPS MODULE QUICK TEST"));
   Serial.print(F("Testing with TinyGPS++ library v. ")); Serial.println(TinyGPSPlus::libraryVersion());
   Serial.println(); // GPS setup finish
-  
-//                    // Temperatura setup start
+
+  //                    // Temperatura setup start
   pinMode(12, INPUT );
-pinMode(13, OUTPUT);
-// Begin serial communication at 9600 baud rate
-                         //Temperatura setup finish
-                         
-
-                              // deep sleep setup start , initialize the digital pin as an output.
-                            pinMode(LIGHT_SENSOR_PIN, OUTPUT);
-                              // deep sleep setup finish
+  pinMode(13, OUTPUT);
+  // Begin serial communication at 9600 baud rate
+  //Temperatura setup finish
 
 
-                        
-                       //AIR sensor setup start
-   I2CBME.begin(I2C_SCL, I2C_SDA);//last param is clock freq
-   air_sensor.begin(10000);
-                     //AIR sensor setup finish       
-                     // Dust sensor setup start
-                      
-  Serial2.begin(9600,SERIAL_8N1,dust_sensor,-1); 
-                     // Dust sensor setup finish
+  // deep sleep setup start , initialize the digital pin as an output.
+  pinMode(LIGHT_SENSOR_PIN, OUTPUT);
+  // deep sleep setup finish
 
-                     //Light sensor start setup
-                     
-// initialize serial communication at 9600 bits per second:
+
+
+  //AIR sensor setup start
+  I2CBME.begin(I2C_SCL, I2C_SDA);//last param is clock freq
+  air_sensor.begin(10000);
+  //AIR sensor setup finish
+  // Dust sensor setup start
+
+  Serial2.begin(9600, SERIAL_8N1, dust_sensor, -1);
+  // Dust sensor setup finish
+
+  //Light sensor start setup
+
+  // initialize serial communication at 9600 bits per second:
   Serial.begin(9600);  //115200
 
-  pinMode(4,OUTPUT);
-                    //Light sensor finish 
-  
+  pinMode(4, OUTPUT);
+  //Light sensor finish
 
 
-                  // Connecting to WIFI start
+
+  // Connecting to WIFI start
   Serial.println("connecteing to wifi");
- WiFi.begin(ssid, password);  
-  while (WiFi.status() != WL_CONNECTED) {  
-   Serial.print("."); 
-   delay(500);
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print(".");
+    delay(500);
   }                   //connecting to WIFI finish
-  
-                      // conecting to mqtt
-client.setServer(mqtt_server, 1883);
 
- Serial.println("Connect to MQTT");
+  // conecting to mqtt
+  client.setServer(mqtt_server, 1883);
+
+  Serial.println("Connect to MQTT");
   client.connect("ESP32Client");
 
   if (!client.connected()) {
     Serial.println("NOT CONNECTED");
-                       // coneccting to mqtt finish
+    // coneccting to mqtt finish
   }
- }
+}
 
 
 void loop()
-{                     //GPS setup start
-   while (ss.available() > 0)
+{ //GPS setup start
+  while (ss.available() > 0)
     if (gps.encode(ss.read()))
       displayInfo();
-      
+
   if (millis() > 5000 && gps.charsProcessed() < 10)
   {
     Serial.println(F("No GPS Module Found! Check Hardware!!"));
-    while(true);
+    while (true);
   }
-  }
-               // mqtt publishValue start
+}
+// mqtt publishValue start
 
-void publishValue(float val){
+void publishValue(float val, int topic) {
 
- if(!client.connected()){
-     client.connect("ESP32Client");
-   
+  if (!client.connected()) {
+    client.connect("ESP32Client");
+
   }
   client.loop(); //loop
-  client.publish(inTopic,String(val).c_str(), true); 
- 
-                // mqtt publishValue finish
+  if (topic == 1) {
+    client.publish(inTopictemp, String(val).c_str(), true);
+  }
+  else if (topic == 2) {
+    client.publish(inTopicvoc, String(val).c_str(), true);
+  }
+  else if (topic == 3) {
+    client.publish(inTopiclight, String(val).c_str(), true);
+  }
+  // mqtt publishValue finish
 }
 
 
 void displayInfo()
 {
-  Serial.print(F("Loc in DK: ")); 
+  Serial.print(F("Loc in DK: "));
   if (gps.location.isValid())
   {
     Serial.print(gps.location.lat(), 6);
     Serial.print(F(","));
     Serial.print(gps.location.lng(), 6);
-    
-                                         //publishValue(gps);             //GPS publishValue(gps);     to mqtt.
-                                           
-     
+
+
+
+
   }
   else
   {
@@ -198,83 +210,83 @@ void displayInfo()
   }
   Serial.println();           //Gps loop finish
 
-  
-                                          
- 
-    
-                   // Temperatura loop start 
-float sensor = analogRead(34);
-//Serial.println(sensor);
-float temp =  (sensor / 4095.0)* 1.05;         //4095.0
-// Convert the voltage into the temperature in Celsius
+
+
+
+
+  // Temperatura loop start
+  float sensor = analogRead(34);
+  //Serial.println(sensor);
+  float temp =  (sensor / 4095.0) * 1.05;        //4095.0
+  // Convert the voltage into the temperature in Celsius
   float temperatureC = temp * 100;
 
 
-delay(1000);
-                 // swith termometr 
-                 // Print the temperature in Celsius
- 
- 
+  delay(1000);
+  // swith termometr
+  // Print the temperature in Celsius
+
+
   Serial.print("Temperature: ");
   Serial.print(temperatureC);
   Serial.print("\xC2\xB0"); // shows degree symbol
   Serial.print("C  |  ");
-  
+
   // Print the temperature in Fahrenheit
   float temperatureF = (temperatureC * 9.0 / 5.0) + 32.0;
   Serial.print(temperatureF);
   Serial.print("\xC2\xB0"); // shows degree symbol
   Serial.println("F");
-   publishValue(temperatureC);                                //publishValue(temperatureC); to mqtt
-                                                                  
+  publishValue(temperatureC, 1);                                //publishValue(temperatureC); to mqtt
+
   delay(1000); // wait a second between readings
-//                 // temperatura loop finish
-                 
-           // AIR sensor loop start
-           uint16_t index = air_sensor.getVoclndex();
+  //                 // temperatura loop finish
+
+  // AIR sensor loop start
+  uint16_t index = air_sensor.getVoclndex();
 
   Serial.print("vocIndex = ");
   Serial.println(index);
-  
-  publishValue(index);                               //publishValue(index);        to mqtt       
-  delay(1000);  
-            // AIR sensor loop finish. 
-                      
-            // Dust sensor loop start
-byte dust_byte[30];
+
+  publishValue(index, 2);                                           //publishValue(index);        to mqtt
+  delay(1000);
+  // AIR sensor loop finish.
+
+  // Dust sensor loop start
+  byte dust_byte[30];
   int dust_index = 0;
   int dust_data[3];
   int l = 0;
-//  while(!Serial2.available()) { 
-//  }
-  if(Serial2.read() == 0x42 && Serial2.read() == 0x4D) {
+  //  while(!Serial2.available()) {
+  //  }
+  if (Serial2.read() == 0x42 && Serial2.read() == 0x4D) {
     //Serial.println("header done");
-    for(int i = 0; i < 14; i++) {
-       if(Serial2.available()) {
-        
-         //if(i%2 == 0) {
-           //Serial.print("HIGH ");
-         //} else {
-           //Serial.print("LOW ");
-         //}
-         dust_byte[dust_index] =  Serial2.read();
-         //Serial.println(dust_byte[dust_index]);
-         dust_index++;
-       }
+    for (int i = 0; i < 14; i++) {
+      if (Serial2.available()) {
+
+        //if(i%2 == 0) {
+        //Serial.print("HIGH ");
+        //} else {
+        //Serial.print("LOW ");
+        //}
+        dust_byte[dust_index] =  Serial2.read();
+        //Serial.println(dust_byte[dust_index]);
+        dust_index++;
+      }
     }
-    for(int i = 14; i < 30; i++) { //flush the no-data bytes[
-      if(Serial2.available()) {
+    for (int i = 14; i < 30; i++) { //flush the no-data bytes[
+      if (Serial2.available()) {
         Serial2.read();
       }
     }
   }
- //int h_length = dust_byte[0];
- //int l_length = dust_byte[1];
- //l = h_length + l_length + 2;
- //Serial.print("length: ");
- //Serial.println(l);
-  for(int i = 0; i < 3; i++) {
-    int value = (dust_byte[2+i*2]<<4) + dust_byte[2+1+(i*2)];
+  //int h_length = dust_byte[0];
+  //int l_length = dust_byte[1];
+  //l = h_length + l_length + 2;
+  //Serial.print("length: ");
+  //Serial.println(l);
+  for (int i = 0; i < 3; i++) {
+    int value = (dust_byte[2 + i * 2] << 4) + dust_byte[2 + 1 + (i * 2)];
     dust_data[i] = value;
   }
   Serial.print("PM1:");
@@ -286,15 +298,15 @@ byte dust_byte[30];
   Serial.print("PM10:");
   Serial.print(dust_data[2]);
   Serial.println("");
- 
-   
-  
-    
-              // Dust loop finish.
 
-              //Light sensor loop start 
 
-// reads the input on analog pin (value between 0 and 4095)
+
+
+  // Dust loop finish.
+
+  //Light sensor loop start
+
+  // reads the input on analog pin (value between 0 and 4095)
   int analogValue = analogRead(LIGHT_SENSOR_PIN);
 
   Serial.print("Value Light= ");
@@ -302,22 +314,22 @@ byte dust_byte[30];
 
   // We'll have a few threshholds, qualitatively determined
   if (analogValue < 200) {
-  setCpuFrequencyMhz(1200);
- digitalWrite(analogValue, HIGH);   // turn the LED on (HIGH is the voltage level)
- delay(5000);               // wait for a second
- digitalWrite(analogValue, LOW);    // turn the LED off by making the voltage LOW
- delay(5000);               // wait for a second
-  esp_sleep_enable_timer_wakeup(20 * 60 * 1000);
-  //esp_sleep_enable_ext0_wakeup(GPIO_NUM_34);//could be woken by a pin going high
-  esp_deep_sleep_start();
-  // deep sleep finish 
+    setCpuFrequencyMhz(1200);
+    digitalWrite(analogValue, HIGH);   // turn the LED on (HIGH is the voltage level)
+    delay(5000);               // wait for a second
+    digitalWrite(analogValue, LOW);    // turn the LED off by making the voltage LOW
+    delay(5000);               // wait for a second
+    esp_sleep_enable_timer_wakeup(20 * 60 * 1000);
+    //esp_sleep_enable_ext0_wakeup(GPIO_NUM_34);//could be woken by a pin going high
+    esp_deep_sleep_start();
+    // deep sleep finish
 
   }
-   //deep sleep start 
-   else if (analogValue < 200 ){
+  //deep sleep start
+  else if (analogValue < 200 ) {
     Serial.println(" => Night");
-    digitalWrite(4, LOW);                                                         
-                                                                                                          
+    digitalWrite(4, LOW);
+
   } else if (analogValue < 500) {
     Serial.println(" => Day Dim");
     digitalWrite(4, LOW);
@@ -331,13 +343,10 @@ byte dust_byte[30];
     Serial.println(" => Day Very Bright");
     digitalWrite(4, HIGH);
   }
-      publishValue(analogValue);    //LIGHT SENSOR publishValue(analogValue); 
+  publishValue(analogValue, 3);                                 //LIGHT SENSOR publishValue(analogValue);
   delay(1000); // delay(300 000); = 5 minut.
 
-             // Light sensor loop finish 
+  // Light sensor loop finish
 
 
-
- 
-           
 }
