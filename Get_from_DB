@@ -1,0 +1,47 @@
+from flask import Flask, redirect, url_for, render_template
+import mariadb, sys
+# Connect to MariaDB Platform
+print("connecting to DB")
+try:
+    conn = mariadb.connect(
+        user="root",
+        password="kalimag60148579",
+        host="127.0.0.1",
+        port=3306,
+        database="measurements",
+        autocommit=True
+    )
+except mariadb.Error as e:
+    print(f"Error connecting to MariaDB Platform: {e}")
+    sys.exit(1)
+
+# Get Cursor
+print("get data")
+cur = conn.cursor()
+cur.execute("SELECT temperature FROM temperatures")
+#cur.execute("SELECT temperature FROM temperatures ORDER BY id DESC LIMIT 1;")  #last row from sensors data
+#cur.execute("SELECT  * FROM temperatures")
+result = cur.fetchall()
+
+
+#result = cur.fetchone()
+#print(result)
+
+
+print(result[1])
+print(result[2])
+print(result[0])
+app = Flask(__name__)
+app.debug = True
+
+
+@app.route("/")
+def execute():
+  val1 = result[0]
+  val2 = result[1]
+  val3 = result[2]
+
+
+  return render_template("multipleVal.html", first=val1, second=val2, third=val3)
+
+app.run(host='0.0.0.0', port=5000)
