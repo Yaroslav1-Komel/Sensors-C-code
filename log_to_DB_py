@@ -6,7 +6,7 @@ def add_measurement_to_database(cur, payload, topic):
         all_data = True
 
         if 'eaaa/e21a/test/Project3/temp' in topic:
-            data_in[0] = payload
+             data_in[0] = payload
         elif 'eaaa/e21a/test/Project3/voc' in topic:
             data_in[1] = payload
         elif'eaaa/e21a/test/Project3/light' in topic:
@@ -40,7 +40,7 @@ def on_message(client, userdata, msg):
 try:
     conn = mariadb.connect(
         user="root",
-        password="kalimag60148579",
+        password="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
         host="127.0.0.1",
         port=3306,
         database="measurements",
