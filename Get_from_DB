@@ -5,7 +5,7 @@ print("connecting to DB")
 try:
     conn = mariadb.connect(
         user="root",
-        password="kalimag60148579",
+        password="xxxxxxxxxxxxxxxxxxxx",
         host="127.0.0.1",
         port=3306,
         database="measurements",
