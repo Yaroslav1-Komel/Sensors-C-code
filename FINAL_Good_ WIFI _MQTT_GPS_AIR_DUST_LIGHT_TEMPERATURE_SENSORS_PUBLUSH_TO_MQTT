@@ -1,16 +1,16 @@
 //wifi
 #include <WiFi.h>
 #include <WebServer.h>
-//const char* ssid = "ITEK 2nd"; //Else IP address from raspberypi4
-//const char* password = "Four_Sprints_F21v";   // password for the network
-const char* ssid = "NETGEAR98";
-const char* password = "quickink024";
+const char* ssid = "ITEK 2nd"; //Else IP address from raspberypi4
+const char* password = "Four_Sprints_F21v";   // password for the network
+//const char* ssid = "NETGEAR98";
+//const char* password = "quickink024";
 WiFiClient espClient;
 
 //mqtt connection
 #include <PubSubClient.h>
-//const char* mqtt_server = "10.120.0.220"; // My raspberi pi  or another mqtt server
-const char* mqtt_server = "test.mosquitto.org";
+const char* mqtt_server = "10.120.0.220"; // My raspberi pi  or another mqtt server
+//const char* mqtt_server = "test.mosquitto.org";
 int        port     = 1883;
 const char* inTopictemp = "eaaa/e21a/test/Project3/temp";              //const char* inTopictemp = "eaaa/e21a/test/Project3/temp/voc/light"; ?
 const char* inTopicvoc = "eaaa/e21a/test/Project3/voc";
@@ -344,7 +344,7 @@ void displayInfo()
     digitalWrite(4, HIGH);
   }
   publishValue(analogValue, 3);                                 //LIGHT SENSOR publishValue(analogValue);
-  delay(1000); // delay(300 000); = 5 minut.
+  delay(300000);                                //delay(1000); 
 
   // Light sensor loop finish
 }
